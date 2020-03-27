@@ -1,0 +1,49 @@
+# Your presentation title
+title: {title}
+
+# Your presentation description (optional)
+description: {description}
+
+# Your name (optional)
+author: {author}
+authorurl: {authorurl}
+
+# The Reveal theme
+reveal_theme: black.css
+
+collections:
+  slides:
+    defaults:
+
+# The Reveal transition
+reveal_transition: none
+
+# Path to the used theme (defaults to the Reveal.js standard theme path)
+reveal_theme_path: reveal.js/css/theme/
+
+# Additional custom CSS paths
+extra_css:
+
+# Custom CSS for highlighting (defaults to reveal.js/lib/css/zenburn.css)
+highlight_style_sheet:
+
+# Embed Server-side speaker notes?
+reveal_notes_server: false
+
+# Additional reveal.js options
+reveal_options:
+
+# Additional reveal.js dependencies
+reveal_dependencies:
+
+# Reveal.js subdirectory
+reveal_path: reveal.js/
+
+# Exclude directories and/or files from the conversion
+exclude:
+  - Gemfile*
+  - README.md
+
+# Don't change anything below
+markdown: kramdown
+highlighter: rouge

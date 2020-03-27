@@ -1,4 +1,3 @@
-from .lecture import show_image
-from .lecture import show_frame
+from .lecture import Presentation
 
-__all__ = ['show_image','show_frame']
+__all__ = ['Presentation']
