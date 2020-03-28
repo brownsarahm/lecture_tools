@@ -3,7 +3,7 @@ from IPython.display import display, Markdown, Latex
 from numpy import inf
 from .slides import (MarkdownSlide, ImageSlide, ImageAnimateSlide,
                     BulletAnimateSlide, HackmdExercise)
-from .segments import Canvas
+from .segments import PreModule, PostModule
 import pkg_resources as pkgrs
 
 
@@ -12,14 +12,15 @@ segment_shortnames = {'md':MarkdownSlide,
                     'img-animate': ImageAnimateSlide,
                     'animate':BulletAnimateSlide,
                     'hackmd':HackmdExercise,
-                    'canvas':Canvas}
+                    'canvas':PreModule,
+                    'prereq':PreModule,
+                    'postnotes':PostModule}
 
 copy_path = os.path.join('resources','copy')
 copy_files = pkgrs.resource_listdir(__name__,copy_path)
 
 pystring_path = os.path.join('./resources','pystrings')
-readme_path = os.path.join(pystring_path,'README.md')
-config_template_path = os.path.join(pystring_path,'config_template.yml')
+
 
 
 
@@ -49,6 +50,7 @@ class Presentation():
         '''
 
         self.title, _ = content_file.split('.')
+        self.sourcefile = os.path.abspath(content_file)
         self.slides = {}
         self.slide_order_list = []
         self.slide_order_dict = {}
@@ -87,6 +89,8 @@ class Presentation():
         slide_order_dict = {title:i + len(self.slides)
                                 for i,title in enumerate(slide_order_list)}
 
+        if len(set(slide_order_list)) < len(slide_order_list):
+            raise NameError('Reused Slide Name')
         # append all (update is dictionary apped)
         self.slides.update(slides)
         self.supplementary.update(supplementary)
@@ -130,6 +134,9 @@ class Presentation():
 
     def generate_lecture_repo(self,repo_dir, slide_dir = '_slides'):
         '''
+        generate repository that will work with reveal.js via the
+        jekyll-reveal-deck-pack theme
+
         '''
         # copy files
         for file in copy_files:
@@ -143,6 +150,12 @@ class Presentation():
             # with open(destination,'r') as f:
             #     f.write(source_str)
 
+
+
+        # ---------------------------------------------------------------------
+        #                        process readme
+        # ---------------------------------------------------------------------
+        readme_path = os.path.join(pystring_path,'README.md')
         # read in readme template
         readme_file =  pkgrs.resource_filename(__name__,readme_path)
         with open (readme_file,'r') as f:
@@ -156,6 +169,67 @@ class Presentation():
         with open(os.path.join(repo_dir,'README.md'),'w') as f:
             f.write(readme)
 
+        # ---------------------------------------------------------------------
+        #                        process index
+        # ---------------------------------------------------------------------
+        index_path = os.path.join(pystring_path,'index.md')
+        # read in readme template
+        index_file =  pkgrs.resource_filename(__name__,index_path)
+        with open (index_file,'r') as f:
+            index_template = f.read()
+
+        # format readme
+        index = index_template.format(title = self.meta['title'],
+                                description = self.meta['description'])
+
+        index += '\n## [Slides]({% link slides.md %})'
+        index += '\n## [Handout]({% link handout.md %})'
+
+
+        # write readme
+        with open(os.path.join(repo_dir,'index.md'),'w') as f:
+            f.write(index)
+
+
+        # ---------------------------------------------------------------------
+        #                        process hanouts
+        # ---------------------------------------------------------------------
+        handout_template_path = os.path.join(pystring_path,'handout_header.md')
+        # read in readme template
+        handout_file =  pkgrs.resource_filename(__name__,handout_template_path)
+        with open (handout_file,'r') as f:
+            handout_template = f.read()
+
+        prereq_list = [s.content for s in self.supplementary.values() if s.is_prereq]
+        prereqs = '\n<hr>\n'.join(prereq_list)
+        # format readme
+        handout = handout_template.format(slide_dir = slide_dir.strip('_'),
+                                prereqs = prereqs)
+
+        # write readme
+        with open(os.path.join(repo_dir,'handout.md'),'w') as f:
+            f.write(handout)
+
+        # ---------------------------------------------------------------------
+        #                        process slides
+        # ---------------------------------------------------------------------
+        slide_template_path = os.path.join(pystring_path,'slides.md')
+        # read in readme template
+        slides_file =  pkgrs.resource_filename(__name__,slide_template_path)
+        with open (slides_file,'r') as f:
+            slides_template = f.read()
+
+        # format readme
+        slides = slides_template.format(slide_dir = slide_dir.strip('_'))
+
+        # write readme
+        with open(os.path.join(repo_dir,'slides.md'),'w') as f:
+            f.write(slides)
+
+        # ---------------------------------------------------------------------
+        #                        process config
+        # ---------------------------------------------------------------------
+        config_template_path = os.path.join(pystring_path,'config_template.yml')
         # format config file
         config_template_file =  pkgrs.resource_filename(__name__,config_template_path)
         with open (config_template_file,'r') as f:
@@ -188,20 +262,18 @@ class Presentation():
 
             # convert the whole thing to a dictionary
             slide_dict = cur_slide.__dict__
-            # extract the body
-            # cur_body = cur_slide.body
-            #
-            # # mer
-            # if type(cur_body) == list:
-            #     cur_body = '\n'.join(cur_body)
-
-
-
+            slide_dict.pop('content')
 
             # merge lists with newlines and -
+
             for k,v in slide_dict.items():
                 if type(v) == list:
-                    slide_dict[k] = '\n-'.join(slide_dict[k])
+                    slide_dict[k] = '\n'.join(slide_dict[k])
+
+                    # if k == 'notes':
+                    #     slide_dict[k] = '\n-'.join(slide_dict[k])
+                    # else:
+
 
             # add order number
             slidenum = self.slide_order_dict[title] + 1

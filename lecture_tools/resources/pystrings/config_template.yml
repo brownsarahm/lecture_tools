@@ -8,6 +8,12 @@ description: {description}
 author: {author}
 authorurl: {authorurl}
 
+# overall theme
+plugins:
+  - jekyll-remote-theme
+
+remote_theme: brownsarahm/jekyll-reveal-deck-pack
+
 # The Reveal theme
 reveal_theme: black.css
 
