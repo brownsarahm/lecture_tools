@@ -182,8 +182,8 @@ class Presentation():
         index = index_template.format(title = self.meta['title'],
                                 description = self.meta['description'])
 
-        index += '\n## [Slides]({% link slides.md %})'
-        index += '\n## [Handout]({% link handout.md %})'
+        index += '\n## [Slides]({{ site.baseurl }}{% link slides.md %})'
+        index += '\n## [Handout]({{ site.baseurl }}{% link handout.md %})'
 
 
         # write readme
