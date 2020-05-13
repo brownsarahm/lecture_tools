@@ -1,5 +1,6 @@
 from IPython.display import display, Markdown, Latex
 from .segments import Slide
+import os
 
 
 class MarkdownSlide(Slide):
@@ -25,11 +26,26 @@ class ImageSlide(Slide):
     '''
     def __init__(self, slide_dict):
         super().__init__(slide_dict)
+        self.imgdir = slide_dict['info']['imgdir']
+        self.make_body()
+
+    def make_body(self):
+        '''
+        make the body string so that it can be both displayed and printed
+        '''
+        # source_path = os.path.dirname(self.sourcefile)
+        # img_path = os.path.join(self.imgdir,self.name+'.png')
+
+        img_path = os.path.join('img',self.name+'.png')
+        img_tmp = '<img src=" {name}" />'
+        img_str = img_tmp.format(name = img_path)
+        self.body = img_str
 
     def show(self):
         '''
         '''
-        display(Markdown('<img src="./slides/' + self.name +'.png" />'))
+
+        display(Markdown(self.body))
 
 
 

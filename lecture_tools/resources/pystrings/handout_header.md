@@ -1,7 +1,7 @@
 ---
 layout: handouts
 slideset: {slide_dir}
-permalink: handout/
+permalink: {permalink}/
 ---
 
-{prereqs}
+{heading}

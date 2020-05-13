@@ -69,6 +69,18 @@ class Presentation():
         # split slides
         segments_raw = lect_raw.split('----')
         meta = segments_raw[0]
+
+        # meta data parsing
+        meta = meta.split('\n')
+        #split all non empty ones at :
+        meta = [m.split(':') for m in meta if len(m)>0]
+        meta = {m[0].strip():m[1].strip() for m in meta}
+        # make it absolute
+        source_path = os.path.dirname(self.sourcefile)
+        meta['imgdir'] = os.path.join(source_path,meta['imgdir'] )
+        self.meta = meta
+
+
         # split header from body
         segments_header_body = [s.split('---') for s in segments_raw[1:]]
         # make one dict per slide and strucutre info into subdict
@@ -97,12 +109,7 @@ class Presentation():
         self.slide_order_list.extend(slide_order_list)
         self.slide_order_dict.update(slide_order_dict)
 
-        # meta data parsing
-        meta = meta.split('\n')
-        #split all non empty ones at :
-        meta = [m.split(':') for m in meta if len(m)>0]
-        meta = {m[0].strip():m[1].strip() for m in meta}
-        self.meta = meta
+
 
     def generate_object(self,slide_dict):
         '''
@@ -111,6 +118,9 @@ class Presentation():
         # complete the info fields
         if not('type' in slide_dict['info'].keys()):
             slide_dict['info']['type'] = 'md'
+
+        slide_dict['info']['imgdir'] = self.meta['imgdir']
+
         # return the slide after parsing
         return segment_shortnames[slide_dict['info']['type']](slide_dict)
 
@@ -150,6 +160,7 @@ class Presentation():
             # with open(destination,'r') as f:
             #     f.write(source_str)
 
+        # todo : copy images
 
 
         # ---------------------------------------------------------------------
@@ -192,7 +203,7 @@ class Presentation():
 
 
         # ---------------------------------------------------------------------
-        #                        process hanouts
+        #                        process handouts and info pages
         # ---------------------------------------------------------------------
         handout_template_path = os.path.join(pystring_path,'handout_header.md')
         # read in readme template
@@ -202,14 +213,29 @@ class Presentation():
 
         prereq_list = [s.content for s in self.supplementary.values() if s.is_prereq]
         prereqs = '\n<hr>\n'.join(prereq_list)
-        # format readme
-        handout = handout_template.format(slide_dir = slide_dir.strip('_'),
-                                prereqs = prereqs)
+        # format lesson overall page
+        lesson = handout_template.format(slide_dir = slide_dir.strip('_'),
+                                heading = prereqs, permalink='lesson')
 
-        # write readme
+        # write lesson ovearll page
+        with open(os.path.join(repo_dir,'lesson.md'),'w') as f:
+            f.write(lesson)
+
+        # format handout
+        handout = handout_template.format(slide_dir = slide_dir.strip('_'),
+                                heading = '',permalink='handout')
+
+        # write handout
         with open(os.path.join(repo_dir,'handout.md'),'w') as f:
             f.write(handout)
 
+        # format homework
+        handout = handout_template.format(slide_dir = slide_dir.strip('_'),
+                                heading = '',permalink='postnotes')
+
+        # write handout
+        with open(os.path.join(repo_dir,'followup.md'),'w') as f:
+            f.write(handout)
         # ---------------------------------------------------------------------
         #                        process slides
         # ---------------------------------------------------------------------

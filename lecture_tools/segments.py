@@ -6,7 +6,7 @@ class Segment():
     '''
     def __init__(self,info_dict):
         '''
-        set name and content
+        set name and content, which can be split into notes and body
         '''
         self.name = info_dict['info']['name']
         self.content  = info_dict['body'].split('\n')
@@ -15,12 +15,11 @@ class Segment():
     def is_slide(self):
         return False
 
-    def is_prereq(self):
-        return True
+
 
 class Module(Segment):
     '''
-    Pre requisite modules
+    Modules have content, but no body
 
     '''
     def __init__(self,info_dict):
@@ -30,12 +29,18 @@ class Module(Segment):
 
 class PreModule(Module):
     '''
+    modules that provide information before the content of a lesson
 
+    for example introductory remarks or required reading
     '''
+    def is_prereq(self):
+        return True
 
 class PostModule(Module):
     '''
+    modules that provide information after the content of a lesson
 
+    for exmaple, summative assessment or further reading.
     '''
 
     def is_prereq(self):
@@ -69,7 +74,7 @@ class Slide(Segment):
         '''
         Slides are not prereqs
         '''
-        return True
+        return False
 
     def strip_notes(self):
         '''
