@@ -5,7 +5,7 @@
 
 Welcome to Lecture Tools's documentation!
 =========================================
-
+This file contains the background for lecture tools. 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
